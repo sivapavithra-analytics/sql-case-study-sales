@@ -2,7 +2,6 @@
 
 ## 📌 Project Overview
 This project demonstrates SQL skills through real-world business case studies using sales and customer data.
-
 The analysis focuses on answering practical business questions using SQL queries.
 
 ---
@@ -22,8 +21,29 @@ The analysis focuses on answering practical business questions using SQL queries
 
 ---
 
-## 📈 Skills Demonstrated
-- SELECT, WHERE, GROUP BY
-- JOINs (INNER, LEFT)
+## 💼 Skills Demonstrated
+- SQL Query Writing
+- Data Cleaning & Import
+- Business KPI Analysis
+- Aggregation & Grouping
 - Subqueries
-- Window functions (basic)
+- Relational Database Design
+- PostgreSQL
+
+---
+
+## 📈 Key Insights
+- Identified top revenue-generating customers
+- Determined best-performing product categories
+- Analyzed seasonal/monthly sales trends
+- Evaluated customer purchase behavior
+- Demonstrated strong SQL fundamentals (JOINs, GROUP BY, Subqueries, Aggregations)
+
+---
+
+## 💼 Business Value
+This case study simulates real-world sales analysis performed by Data Analysts to:
+- Improve customer retention
+- Identify revenue drivers
+- Support business decision-making
+  
