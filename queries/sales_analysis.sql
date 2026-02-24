@@ -1,119 +1,144 @@
 -- Sales & Customer Analysis
 
---1 Create Database
-CREATE DATABASE sales_analysis;
-\c sales_analysis;
-
---2 Create Tables
-
--- Customers Table
+-- Create Table
+--1 Create Customers Table
 CREATE TABLE customers (
-    customer_id INT PRIMARY KEY,
-    customer_name VARCHAR(100),
-    email VARCHAR(100),
-    city VARCHAR(50),
-    country VARCHAR(50)
+    CustomerID VARCHAR(10) PRIMARY KEY,
+    Name VARCHAR(50),
+    Country VARCHAR(50),
+    Email VARCHAR(100),
+    JoinDate DATE
 );
 
--- Products Table
+--2 Create Products Table
 CREATE TABLE products (
-    product_id INT PRIMARY KEY,
-    product_name VARCHAR(100),
-    category VARCHAR(50),
-    price NUMERIC(10,2)
+    ProductID VARCHAR(10) PRIMARY KEY,
+    ProductName VARCHAR(50),
+    Category VARCHAR(50),
+    UnitPrice NUMERIC(10,2)
 );
 
--- Orders Table
+--3 Create Orders Table
 CREATE TABLE orders (
-    order_id INT PRIMARY KEY,
-    customer_id INT REFERENCES customers(customer_id),
-    order_date DATE
+    OrderID VARCHAR(10) PRIMARY KEY,
+    CustomerID VARCHAR(10) REFERENCES customers(CustomerID),
+    ProductID VARCHAR(10) REFERENCES products(ProductID),
+    OrderDate DATE,
+    Quantity INT
 );
 
--- Sales Table
+--4 Create Sales Table
 CREATE TABLE sales (
-    sale_id INT PRIMARY KEY,
-    order_id INT REFERENCES orders(order_id),
-    product_id INT REFERENCES products(product_id),
-    quantity INT,
-    total_amount NUMERIC(10,2)
+    SaleID VARCHAR(10) PRIMARY KEY,
+    OrderID VARCHAR(10) REFERENCES orders(OrderID),
+    Revenue NUMERIC(10,2),
+    Profit NUMERIC(10,2)
 );
 
---3 Import CSV Data
+--Import 
+COPY customers FROM 'E:/My Github projects/SQL Case Study - Customer & Sales Analysis/data/customers.csv' DELIMITER ',' CSV HEADER;
+COPY products FROM 'E:/My Github projects/SQL Case Study - Customer & Sales Analysis/data/products.csv' DELIMITER ',' CSV HEADER;
+COPY orders FROM 'E:/My Github projects/SQL Case Study - Customer & Sales Analysis/data/orders.csv' DELIMITER ',' CSV HEADER;
+COPY sales FROM 'E:/My Github projects/SQL Case Study - Customer & Sales Analysis/data/sales.csv' DELIMITER ',' CSV HEADER;
+
+-- Verify Data
+SELECT * FROM customers;
+SELECT * FROM products;
+SELECT * FROM orders;
+SELECT * FROM sales;
 
 -- Business Analysis Queries
+--1 Total Amount
+SELECT 
+    o.OrderID,
+    p.ProductName,
+    p.UnitPrice,
+    o.Quantity,
+    (p.UnitPrice * o.Quantity) AS Total_Amount
+FROM orders o
+JOIN products p 
+    ON o.ProductID = p.ProductID;
 
---1 Total Revenue
-SELECT SUM(total_amount) AS total_revenue
+--2 Total Revenue
+SELECT SUM(revenue) AS total_revenue
 FROM sales;
 
---2 Monthly Revenue Trend
+--3 Monthly Revenue Trend
 SELECT 
-    DATE_TRUNC('month', o.order_date) AS month,
-    SUM(s.total_amount) AS monthly_revenue
-FROM sales s
-JOIN orders o ON s.order_id = o.order_id
-GROUP BY month
-ORDER BY month;
+    DATE_TRUNC('month', o.OrderDate) AS Month,
+    SUM(p.UnitPrice * o.Quantity) AS Monthly_Revenue
+FROM orders o
+JOIN products p 
+    ON o.ProductID = p.ProductID
+GROUP BY DATE_TRUNC('month', o.OrderDate)
+ORDER BY Month;
 
---3 Top 10 Customers by Revenue
+--4 Top 5 Customers by Revenue
 SELECT 
-    c.customer_id,
-    c.customer_name,
-    SUM(s.total_amount) AS total_spent
+    c.CustomerID,
+    c.Name,
+    SUM(s.Revenue) AS Total_Revenue
 FROM customers c
-JOIN orders o ON c.customer_id = o.customer_id
-JOIN sales s ON o.order_id = s.order_id
-GROUP BY c.customer_id, c.customer_name
-ORDER BY total_spent DESC
-LIMIT 10;
+JOIN orders o 
+    ON c.CustomerID = o.CustomerID
+JOIN sales s 
+    ON o.OrderID = s.OrderID
+GROUP BY c.CustomerID, c.Name
+ORDER BY Total_Revenue DESC
+LIMIT 5;
 
---4 Best-Selling Products
-SELECT 
-    p.product_name,
-    SUM(s.quantity) AS total_quantity_sold
-FROM sales s
-JOIN products p ON s.product_id = p.product_id
-GROUP BY p.product_name
-ORDER BY total_quantity_sold DESC;
- 
---5 Revenue by Category
-SELECT 
-    p.category,
-    SUM(s.total_amount) AS category_revenue
-FROM sales s
-JOIN products p ON s.product_id = p.product_id
-GROUP BY p.category
-ORDER BY category_revenue DESC;
 
---6 Customer Purchase Frequency
+--5 Best-Selling Products
 SELECT 
-    c.customer_name,
-    COUNT(DISTINCT o.order_id) AS total_orders
+    p.ProductID,
+    p.ProductName,
+    SUM(o.Quantity) AS Total_Quantity_Sold
+FROM products p
+JOIN orders o 
+    ON p.ProductID = o.ProductID
+GROUP BY p.ProductID, p.ProductName
+ORDER BY Total_Quantity_Sold DESC;
+
+--6 Revenue by Category
+SELECT 
+    p.Category,
+    SUM(s.Revenue) AS Total_Revenue
+FROM products p
+JOIN orders o 
+    ON p.ProductID = o.ProductID
+JOIN sales s 
+    ON o.OrderID = s.OrderID
+GROUP BY p.Category
+ORDER BY Total_Revenue DESC;
+
+--7 Customer Purchase Frequency
+SELECT 
+    c.name,
+    COUNT(DISTINCT o.orderid) AS total_orders
 FROM customers c
-JOIN orders o ON c.customer_id = o.customer_id
-GROUP BY c.customer_name
+JOIN orders o ON c.customerid = o.customerid
+GROUP BY c.name
 ORDER BY total_orders DESC;
 
---7 High-Value Customers (Revenue> Average Customer Spend)
+--8 High-Value Customers (Revenue > Average Customer Spend)
 SELECT *
 FROM (
     SELECT 
-        c.customer_id,
-        c.customer_name,
-        SUM(s.total_amount) AS total_spent
+        c.customerid,
+        c.name,
+        SUM(s.revenue) AS total_spent
     FROM customers c
-    JOIN orders o ON c.customer_id = o.customer_id
-    JOIN sales s ON o.order_id = s.order_id
-    GROUP BY c.customer_id, c.customer_name
+    JOIN orders o ON c.customerid = o.customerid
+    JOIN sales s ON o.orderid = s.orderid
+    GROUP BY c.customerid, c.name
 ) sub
 WHERE total_spent > (
     SELECT AVG(customer_total)
     FROM (
-        SELECT SUM(total_amount) AS customer_total
+        SELECT SUM(revenue) AS customer_total
         FROM sales s
-        JOIN orders o ON s.order_id = o.order_id
-        GROUP BY o.customer_id
+        JOIN orders o ON s.orderid = o.orderid
+        GROUP BY o.customerid
     ) avg_table
 )
 ORDER BY total_spent DESC;
