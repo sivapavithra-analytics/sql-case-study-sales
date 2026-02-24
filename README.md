@@ -43,7 +43,10 @@ The analysis focuses on answering practical business questions using SQL queries
 
 ## 💼 Business Value
 This case study simulates real-world sales analysis performed by Data Analysts to:
-- Improve customer retention
-- Identify revenue drivers
-- Support business decision-making
+- Improve customer retention strategies
+- Optimize marketing campaigns
+- Forecast revenue more accurately
+- Manage inventory efficiently
+- Identify premium customer segments
+
   
