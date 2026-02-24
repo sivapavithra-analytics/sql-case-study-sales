@@ -36,10 +36,10 @@ CREATE TABLE sales (
 );
 
 --Import 
-COPY customers FROM 'E:/My Github projects/SQL Case Study - Customer & Sales Analysis/data/customers.csv' DELIMITER ',' CSV HEADER;
-COPY products FROM 'E:/My Github projects/SQL Case Study - Customer & Sales Analysis/data/products.csv' DELIMITER ',' CSV HEADER;
-COPY orders FROM 'E:/My Github projects/SQL Case Study - Customer & Sales Analysis/data/orders.csv' DELIMITER ',' CSV HEADER;
-COPY sales FROM 'E:/My Github projects/SQL Case Study - Customer & Sales Analysis/data/sales.csv' DELIMITER ',' CSV HEADER;
+COPY customers FROM 'path/data/customers.csv' DELIMITER ',' CSV HEADER;
+COPY products FROM 'path/data/products.csv' DELIMITER ',' CSV HEADER;
+COPY orders FROM 'path/data/orders.csv' DELIMITER ',' CSV HEADER;
+COPY sales FROM 'path/data/sales.csv' DELIMITER ',' CSV HEADER;
 
 -- Verify Data
 SELECT * FROM customers;
@@ -86,7 +86,6 @@ JOIN sales s
 GROUP BY c.CustomerID, c.Name
 ORDER BY Total_Revenue DESC
 LIMIT 5;
-
 
 --5 Best-Selling Products
 SELECT 
